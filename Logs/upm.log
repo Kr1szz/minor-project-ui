@@ -1,0 +1,18 @@
+[2026-10-23T04:11:30.362Z][INFO] Command-line: 'C:\\Program Files\\Unity\\Hub\\Editor\\6000.6.4f1\\Editor\\Data\\Resources\\PackageManager\\Server\\UnityPackageManager.exe' server -s 7936 --ipc-path Unity-Upm-7936 -l 2 --log-file C:\\Users\\gopal\\Downloads\\ui\\ui_xr/Logs/upm.log
+[2026-10-23T04:11:30.416Z][INFO] IPC server started (IPC path=Unity-Upm-7936).
+[2026-10-23T04:11:30.416Z][INFO] Hint: To connect to this UPM instance, launch Unity with the command-line parameter -upmIpcPath Upm-7936.
+[2026-10-23T04:24:00.934Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-10-23T04:24:01.092Z][INFO] config:project:get-registries <-- Request received
+params: {}
+[2026-10-23T04:24:01.102Z][INFO] project:list-packages <-- Request received
+params: {}
+[2026-10-23T04:24:01.333Z][INFO] config:project:get-registries --> 200 (242 ms)
+[2026-10-23T04:24:02.035Z][INFO] project:list-packages --> 200 (1101 ms)
+[2026-10-23T04:24:02.041Z][INFO] project:list-packages --> 200 (939 ms)
+[2026-10-23T04:24:03.920Z][INFO] project:resolve-packages <-- Request received
+params: {}
+[2026-10-23T04:24:06.845Z][WARN] Requested version [3.0.2] for package [com.unity.nuget.newtonsoft-json] overridden by minimum version [3.2.2].
+[2026-10-23T04:24:06.845Z][WARN] Requested version [1.3.6] for package [com.unity.dt.app-ui] overridden by minimum version [2.1.13].
+[2026-10-23T04:24:06.847Z][INFO] project:resolve-packages --> 200 (2927 ms)
+[2026-10-23T04:32:55.805Z][INFO] Shutting down UnityPackageManager.exe: parent process [7936] is no longer running.
