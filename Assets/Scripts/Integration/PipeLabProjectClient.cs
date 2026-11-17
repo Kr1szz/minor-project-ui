@@ -24,12 +24,6 @@ namespace PipeLab.Integration
         private bool snapshotRequestInProgress;
         private bool polling;
 
-        public void ConfigureFromEnvironment(string baseUrl, string id)
-        {
-            if (!string.IsNullOrWhiteSpace(baseUrl)) apiBaseUrl = baseUrl;
-            if (!string.IsNullOrWhiteSpace(id)) projectId = id;
-        }
-
         private void Start()
         {
             if (connectOnStart) Connect();
@@ -38,7 +32,9 @@ namespace PipeLab.Integration
         public void Connect()
         {
             if (polling) return;
-            if (!TryBuildSnapshotUrl(out _, out string error))
+            string unusedUrl;
+            string error;
+            if (!TryBuildSnapshotUrl(out unusedUrl, out error))
             {
                 SetStatus(error);
                 return;
@@ -73,7 +69,9 @@ namespace PipeLab.Integration
         private IEnumerator FetchSnapshotRoutine()
         {
             if (snapshotRequestInProgress) yield break;
-            if (!TryBuildSnapshotUrl(out string url, out string error))
+            string url;
+            string error;
+            if (!TryBuildSnapshotUrl(out url, out error))
             {
                 SetStatus(error);
                 yield break;
@@ -167,9 +165,16 @@ namespace PipeLab.Integration
             return null;
         }
 
-        private static bool HasThreeFiniteValues(float[] values) => values != null && values.Length >= 3 &&
-            IsFinite(values[0]) && IsFinite(values[1]) && IsFinite(values[2]);
-        private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+        private static bool HasThreeFiniteValues(float[] values)
+        {
+            return values != null && values.Length >= 3 &&
+                   IsFinite(values[0]) && IsFinite(values[1]) && IsFinite(values[2]);
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
 
         private void SetStatus(string status)
         {

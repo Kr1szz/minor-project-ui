@@ -160,28 +160,26 @@ Add backend event sequencing/revision semantics, reconnect snapshots or replay, 
 
 ## Current implementation status
 
-The first Unity integration slice now includes:
+The Unity integration slice now includes:
 
 - Serializable DTOs for the current project snapshot, components, ports, and connections.
 - `PipeLabProjectClient`, a read-only HTTP client for `GET /projects/{project_id}` with configurable URL/project ID, request timeout, periodic polling, manual refresh, structural/numeric validation, and status/snapshot events.
 - `PipeLabProjectRenderer`, which generates simple component and connection geometry and reconciles it by stable IDs.
 - `PipeLabProjectHud`, a runtime status/selection display with desktop mouse selection and `R` refresh shortcut.
-- `PipeLabBootstrap`, which creates the client, renderer, and HUD at runtime without editing scene serialization.
-
 The client uses polling instead of WebSockets because the Unity project does not include a WebSocket package and cross-target support has not been verified. It is read-only for now: the website's current full-component PUT contract plus arbitrary `properties` object makes a safe Unity valve-only update impossible with the project's current serializer. This integration has not yet been compiled or run in Unity in this environment. Unity Editor/device build verification is therefore still required before treating the implementation as finished.
 
 ### Configure the first snapshot request
 
 1. Start the website backend and get a project ID from `GET /projects` or the browser client.
-2. Configure `PIPELAB_API_URL` (for example `http://127.0.0.1:8000` for same-computer Editor testing) and `PIPELAB_PROJECT_ID` in the environment used to launch Unity. Alternatively, add the integration components manually and set their Inspector references/fields.
-3. Open `Assets/Scenes/SampleScene.unity` in Unity, wait for compilation/import, and enter Play Mode. The runtime bootstrap creates the integration client, renderer, and status HUD.
-4. Click a generated component to select it; press **R** to fetch a snapshot immediately. Website edits appear on the configured polling interval (default 5 seconds).
-5. Check the HUD and Unity Console for connection/update status. On a headset, use an API host reachable from the device; `127.0.0.1` on the headset refers to the headset itself.
-6. In the browser, change a component position or add/remove a component, wait up to the polling interval (default 5 seconds), and confirm the Unity geometry matches. Stop the backend briefly to confirm the last valid render remains and the HUD reports a request error; restart it and confirm polling recovers.
+2. In Unity, open `Assets/Scenes/SampleScene.unity`.
+3. In the Hierarchy, right-click an empty area and choose **Create Empty**. Name it `PipeLab Integration`.
+4. Select it, choose **Add Component**, and add `PipeLabProjectClient`, `PipeLabProjectRenderer`, and `PipeLabProjectHud`.
+5. In the `PipeLabProjectClient` Inspector, set **Api Base Url** to `http://127.0.0.1:8000` for Editor testing on the same computer. Paste the project ID into **Project Id**. Leave **Connect On Start** enabled and keep the refresh interval at 5 seconds for now.
+6. On `PipeLabProjectRenderer` and `PipeLabProjectHud`, drag the `PipeLab Integration` GameObject into their **Project Client** reference if it is not filled automatically. The renderer's **Content Root** can stay empty; it will use this GameObject.
+7. Enter Play Mode. The status HUD should report a successful load. Click a generated component to select it; press **R** to fetch a snapshot immediately. Website edits appear on the polling interval.
+8. In the browser, change a component position or add/remove a component, wait up to 5 seconds, and confirm the Unity geometry matches. A headset must use an API host reachable from the device; `127.0.0.1` on the headset refers to the headset itself.
 
-Unity obtains environment variables from its launch environment. When launching Unity Hub from a shell, export `PIPELAB_API_URL` and `PIPELAB_PROJECT_ID` before starting Hub. For repeatable team setup, add a local development configuration mechanism that is ignored by Git; do not commit a personal LAN address or credentials. `127.0.0.1` only works for the same machine; a headset needs a reachable backend host.
-
-Current Player Settings list Android as an active platform. This alone does not configure XREAL device mode, and it does not establish a HoloLens build path. Configure and test each XR target separately after confirming the available SDK/runtime.
+Current Player Settings include Android. This alone does not configure XREAL device mode or establish a HoloLens build path. Do not change `ProjectVersion.txt` by hand to downgrade from Unity 6; make a backup/branch, open a copy in the required Unity 2022 editor, and resolve migration/package issues there.
 
 ## VS Code, Git, and Unity workflow
 

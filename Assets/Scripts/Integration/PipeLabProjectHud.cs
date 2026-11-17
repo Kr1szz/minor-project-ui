@@ -12,31 +12,21 @@ namespace PipeLab.Integration
         private string selectedSummary = "Select a component";
         private string lastStatus = "Not connected";
 
-        public void SetReferences(PipeLabProjectClient client, PipeLabProjectRenderer renderer)
-        {
-            if (projectRenderer != null) projectRenderer.ComponentSelected -= OnComponentSelected;
-            if (projectClient != null) projectClient.StatusChanged -= OnStatusChanged;
-            projectClient = client;
-            projectRenderer = renderer;
-            if (projectRenderer != null) projectRenderer.ComponentSelected += OnComponentSelected;
-            if (projectClient != null)
-            {
-                projectClient.StatusChanged += OnStatusChanged;
-                lastStatus = projectClient.Status;
-            }
-        }
-
         private void Awake()
         {
             ResolveReferences();
         }
 
-        private void Start() { ResolveReferences(); }
+        private void Start()
+        {
+            ResolveReferences();
+            if (projectClient != null) OnStatusChanged(projectClient.Status);
+        }
 
         private void ResolveReferences()
         {
-            if (projectClient == null) projectClient = FindObjectOfType<PipeLabProjectClient>();
-            if (projectRenderer == null) projectRenderer = FindObjectOfType<PipeLabProjectRenderer>();
+            if (projectClient == null) projectClient = GetComponent<PipeLabProjectClient>();
+            if (projectRenderer == null) projectRenderer = GetComponent<PipeLabProjectRenderer>();
             if (projectRenderer != null)
             {
                 projectRenderer.ComponentSelected -= OnComponentSelected;
@@ -54,11 +44,6 @@ namespace PipeLab.Integration
         {
             if (projectRenderer != null) projectRenderer.ComponentSelected -= OnComponentSelected;
             if (projectClient != null) projectClient.StatusChanged -= OnStatusChanged;
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.R)) projectClient?.FetchSnapshot();
         }
 
         private void OnComponentSelected(PipeLabComponentDto component)
@@ -79,7 +64,7 @@ namespace PipeLab.Integration
             GUI.Label(new Rect(pad + 12, pad + 28, 450, 24), lastStatus);
             GUI.Label(new Rect(pad + 12, pad + 52, 450, 24), selectedSummary);
             if (showKeyboardHelp)
-                GUI.Label(new Rect(pad + 12, pad + 78, 450, 30), "Click a part to select  |  R: refresh now");
+                GUI.Label(new Rect(pad + 12, pad + 78, 450, 30), "Click a part to select  |  Project refreshes every 5 seconds");
         }
     }
 }

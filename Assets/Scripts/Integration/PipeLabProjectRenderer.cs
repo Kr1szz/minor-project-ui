@@ -23,24 +23,9 @@ namespace PipeLab.Integration
         public string SelectedComponentId => selectedComponentId;
         public event System.Action<PipeLabComponentDto> ComponentSelected;
 
-        public void SetClient(PipeLabProjectClient client)
-        {
-            if (projectClient == client) return;
-            if (projectClient != null)
-            {
-                projectClient.SnapshotLoaded -= RenderSnapshot;
-            }
-            projectClient = client;
-            if (isActiveAndEnabled && projectClient != null)
-            {
-                projectClient.SnapshotLoaded += RenderSnapshot;
-                if (projectClient.CurrentProject != null) RenderSnapshot(projectClient.CurrentProject);
-            }
-            if (projectClient == null) ClearViews();
-        }
-
         private void Awake()
         {
+            if (projectClient == null) projectClient = GetComponent<PipeLabProjectClient>();
             if (contentRoot == null) contentRoot = transform;
             defaultMaterial = CreateMaterial(new Color(0.20f, 0.62f, 0.78f));
             selectedMaterial = CreateMaterial(new Color(1.0f, 0.72f, 0.16f));
@@ -48,11 +33,18 @@ namespace PipeLab.Integration
 
         private void OnEnable()
         {
-            if (projectClient == null) projectClient = FindObjectOfType<PipeLabProjectClient>();
+            if (projectClient == null) projectClient = GetComponent<PipeLabProjectClient>();
             if (projectClient == null) return;
             projectClient.SnapshotLoaded -= RenderSnapshot;
             projectClient.SnapshotLoaded += RenderSnapshot;
             if (projectClient.CurrentProject != null) RenderSnapshot(projectClient.CurrentProject);
+        }
+
+        private void Start()
+        {
+            if (projectClient == null) projectClient = GetComponent<PipeLabProjectClient>();
+            if (projectClient != null && projectClient.CurrentProject != null)
+                RenderSnapshot(projectClient.CurrentProject);
         }
 
         private void OnDisable()
@@ -178,10 +170,6 @@ namespace PipeLab.Integration
         {
             if (projectClient?.CurrentProject == null) return;
             currentCenter = centerProject ? FindCenter(projectClient.CurrentProject.components) : Vector3.zero;
-            foreach (PipeLabComponentDto component in projectClient.CurrentProject.components)
-                if (component != null) RenderComponent(component, currentCenter);
-            foreach (PipeLabConnectionDto connection in projectClient.CurrentProject.connections)
-                RenderConnection(connection);
             foreach (var pair in componentViews)
             {
                 if (pair.Value == null) continue;
@@ -237,7 +225,9 @@ namespace PipeLab.Integration
         private static Material CreateMaterial(Color color)
         {
             Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            var material = new Material(shader) { color = color };
+            if (shader == null) shader = Shader.Find("Diffuse");
+            var material = new Material(shader);
+            material.color = color;
             return material;
         }
     }
